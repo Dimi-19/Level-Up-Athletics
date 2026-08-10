@@ -1,9 +1,14 @@
+import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { signOut } from "./actions";
 import { Sidebar } from "./Sidebar";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const { profile } = await requireUser();
+
+  if (!profile?.onboarding_completed) {
+    redirect("/onboarding");
+  }
 
   return (
     <div className="flex min-h-screen">

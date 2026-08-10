@@ -6,6 +6,8 @@ export type WeightUnit = "kg" | "lb";
 export type DistanceUnit = "km" | "mi";
 export type TimeFormat = "12h" | "24h";
 export type ReadinessLevel = "low" | "medium" | "high";
+export type BiologicalSex = "male" | "female";
+export type PrimaryGoal = "cut" | "maintain" | "bulk";
 
 export type Database = {
   public: {
@@ -35,6 +37,13 @@ export type Database = {
           nutrition_carbs_g: number | null;
           nutrition_fat_g: number | null;
           nutrition_notes: string | null;
+          age: number | null;
+          height_cm: number | null;
+          weight_kg: number | null;
+          biological_sex: BiologicalSex | null;
+          primary_goal: PrimaryGoal | null;
+          workouts_per_week: number | null;
+          onboarding_completed: boolean;
         };
         Insert: {
           id: string;
@@ -63,6 +72,13 @@ export type Database = {
           nutrition_carbs_g?: number | null;
           nutrition_fat_g?: number | null;
           nutrition_notes?: string | null;
+          age?: number | null;
+          height_cm?: number | null;
+          weight_kg?: number | null;
+          biological_sex?: BiologicalSex | null;
+          primary_goal?: PrimaryGoal | null;
+          workouts_per_week?: number | null;
+          onboarding_completed?: boolean;
         };
         Relationships: [];
       };

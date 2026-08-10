@@ -35,7 +35,15 @@ create table if not exists public.profiles (
   nutrition_protein_g integer,
   nutrition_carbs_g integer,
   nutrition_fat_g integer,
-  nutrition_notes text
+  nutrition_notes text,
+  -- Onboarding questionnaire
+  age integer,
+  height_cm numeric,
+  weight_kg numeric,
+  biological_sex text check (biological_sex in ('male', 'female')),
+  primary_goal text check (primary_goal in ('cut', 'maintain', 'bulk')),
+  workouts_per_week integer,
+  onboarding_completed boolean not null default false
 );
 
 create table if not exists public.teams (
