@@ -51,12 +51,12 @@ export async function logWorkout(teamId: string, formData: FormData) {
   });
 
   revalidatePath(`/teams/${teamId}/workouts`);
-  revalidatePath("/dashboard");
+  revalidatePath("/home");
 }
 
 export async function deleteWorkoutLog(teamId: string, logId: string) {
   const supabase = await createClient();
   await supabase.from("workout_logs").delete().eq("id", logId);
   revalidatePath(`/teams/${teamId}/workouts`);
-  revalidatePath("/dashboard");
+  revalidatePath("/home");
 }

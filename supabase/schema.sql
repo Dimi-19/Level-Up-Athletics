@@ -13,7 +13,29 @@ create extension if not exists "pgcrypto";
 create table if not exists public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,
   full_name text not null,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  -- Identity (Profile tab)
+  sport text,
+  position text,
+  favorite_player text,
+  favorite_team text,
+  shoe_rotation text[] not null default '{}',
+  -- Preferences (Settings tab)
+  profile_visibility text not null default 'private' check (profile_visibility in ('public', 'private')),
+  units_weight text not null default 'lb' check (units_weight in ('kg', 'lb')),
+  units_distance text not null default 'mi' check (units_distance in ('km', 'mi')),
+  time_format text not null default '12h' check (time_format in ('12h', '24h')),
+  notif_session_reminders boolean not null default false,
+  notif_badge_alerts boolean not null default false,
+  notif_missed_session boolean not null default false,
+  whoop_sync_enabled boolean not null default false,
+  whoop_burn_override boolean not null default false,
+  dietary_restriction text,
+  nutrition_calories integer,
+  nutrition_protein_g integer,
+  nutrition_carbs_g integer,
+  nutrition_fat_g integer,
+  nutrition_notes text
 );
 
 create table if not exists public.teams (
@@ -63,6 +85,28 @@ create table if not exists public.workouts (
   description text,
   created_by uuid not null references public.profiles (id) on delete cascade,
   created_at timestamptz not null default now()
+);
+
+create table if not exists public.goals (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles (id) on delete cascade,
+  title text not null,
+  is_completed boolean not null default false,
+  created_at timestamptz not null default now(),
+  completed_at timestamptz
+);
+
+create table if not exists public.journal_entries (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles (id) on delete cascade,
+  entry_date date not null default current_date,
+  readiness text check (readiness in ('low', 'medium', 'high')),
+  content text,
+  good_habits text,
+  bad_habits text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (user_id, entry_date)
 );
 
 create table if not exists public.workout_logs (
@@ -180,6 +224,8 @@ alter table public.events enable row level security;
 alter table public.event_rsvps enable row level security;
 alter table public.workouts enable row level security;
 alter table public.workout_logs enable row level security;
+alter table public.goals enable row level security;
+alter table public.journal_entries enable row level security;
 
 -- profiles: visible to any signed-in user (names only), editable by owner
 create policy "profiles are viewable by authenticated users"
@@ -317,5 +363,47 @@ create policy "users can update their own workout logs"
 
 create policy "users can delete their own workout logs"
   on public.workout_logs for delete
+  to authenticated
+  using (user_id = auth.uid());
+
+-- goals: fully private to the owner
+create policy "users can view their own goals"
+  on public.goals for select
+  to authenticated
+  using (user_id = auth.uid());
+
+create policy "users can create their own goals"
+  on public.goals for insert
+  to authenticated
+  with check (user_id = auth.uid());
+
+create policy "users can update their own goals"
+  on public.goals for update
+  to authenticated
+  using (user_id = auth.uid());
+
+create policy "users can delete their own goals"
+  on public.goals for delete
+  to authenticated
+  using (user_id = auth.uid());
+
+-- journal_entries: fully private to the owner
+create policy "users can view their own journal entries"
+  on public.journal_entries for select
+  to authenticated
+  using (user_id = auth.uid());
+
+create policy "users can create their own journal entries"
+  on public.journal_entries for insert
+  to authenticated
+  with check (user_id = auth.uid());
+
+create policy "users can update their own journal entries"
+  on public.journal_entries for update
+  to authenticated
+  using (user_id = auth.uid());
+
+create policy "users can delete their own journal entries"
+  on public.journal_entries for delete
   to authenticated
   using (user_id = auth.uid());

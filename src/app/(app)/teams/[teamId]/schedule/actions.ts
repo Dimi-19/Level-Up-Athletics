@@ -31,14 +31,14 @@ export async function createEvent(teamId: string, formData: FormData) {
   });
 
   revalidatePath(`/teams/${teamId}/schedule`);
-  revalidatePath("/dashboard");
+  revalidatePath("/home");
 }
 
 export async function deleteEvent(teamId: string, eventId: string) {
   const supabase = await createClient();
   await supabase.from("events").delete().eq("id", eventId);
   revalidatePath(`/teams/${teamId}/schedule`);
-  revalidatePath("/dashboard");
+  revalidatePath("/home");
 }
 
 export async function setRsvp(teamId: string, eventId: string, status: RsvpStatus) {

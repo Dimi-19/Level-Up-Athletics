@@ -27,5 +27,5 @@ export async function signup(formData: FormData) {
     redirect("/login?notice=Check your email to confirm your account, then log in.");
   }
 
-  redirect("/dashboard");
+  redirect("/home");
 }

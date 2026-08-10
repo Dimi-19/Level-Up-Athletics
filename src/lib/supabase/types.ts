@@ -1,6 +1,11 @@
 export type TeamRole = "coach" | "captain" | "athlete";
 export type RsvpStatus = "yes" | "no" | "maybe";
 export type EventType = "practice" | "game" | "meeting" | "other";
+export type ProfileVisibility = "public" | "private";
+export type WeightUnit = "kg" | "lb";
+export type DistanceUnit = "km" | "mi";
+export type TimeFormat = "12h" | "24h";
+export type ReadinessLevel = "low" | "medium" | "high";
 
 export type Database = {
   public: {
@@ -10,6 +15,26 @@ export type Database = {
           id: string;
           full_name: string;
           created_at: string;
+          sport: string | null;
+          position: string | null;
+          favorite_player: string | null;
+          favorite_team: string | null;
+          shoe_rotation: string[];
+          profile_visibility: ProfileVisibility;
+          units_weight: WeightUnit;
+          units_distance: DistanceUnit;
+          time_format: TimeFormat;
+          notif_session_reminders: boolean;
+          notif_badge_alerts: boolean;
+          notif_missed_session: boolean;
+          whoop_sync_enabled: boolean;
+          whoop_burn_override: boolean;
+          dietary_restriction: string | null;
+          nutrition_calories: number | null;
+          nutrition_protein_g: number | null;
+          nutrition_carbs_g: number | null;
+          nutrition_fat_g: number | null;
+          nutrition_notes: string | null;
         };
         Insert: {
           id: string;
@@ -18,6 +43,82 @@ export type Database = {
         };
         Update: {
           full_name?: string;
+          sport?: string | null;
+          position?: string | null;
+          favorite_player?: string | null;
+          favorite_team?: string | null;
+          shoe_rotation?: string[];
+          profile_visibility?: ProfileVisibility;
+          units_weight?: WeightUnit;
+          units_distance?: DistanceUnit;
+          time_format?: TimeFormat;
+          notif_session_reminders?: boolean;
+          notif_badge_alerts?: boolean;
+          notif_missed_session?: boolean;
+          whoop_sync_enabled?: boolean;
+          whoop_burn_override?: boolean;
+          dietary_restriction?: string | null;
+          nutrition_calories?: number | null;
+          nutrition_protein_g?: number | null;
+          nutrition_carbs_g?: number | null;
+          nutrition_fat_g?: number | null;
+          nutrition_notes?: string | null;
+        };
+        Relationships: [];
+      };
+      goals: {
+        Row: {
+          id: string;
+          user_id: string;
+          title: string;
+          is_completed: boolean;
+          created_at: string;
+          completed_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          title: string;
+          is_completed?: boolean;
+          created_at?: string;
+          completed_at?: string | null;
+        };
+        Update: {
+          title?: string;
+          is_completed?: boolean;
+          completed_at?: string | null;
+        };
+        Relationships: [];
+      };
+      journal_entries: {
+        Row: {
+          id: string;
+          user_id: string;
+          entry_date: string;
+          readiness: ReadinessLevel | null;
+          content: string | null;
+          good_habits: string | null;
+          bad_habits: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          entry_date?: string;
+          readiness?: ReadinessLevel | null;
+          content?: string | null;
+          good_habits?: string | null;
+          bad_habits?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          readiness?: ReadinessLevel | null;
+          content?: string | null;
+          good_habits?: string | null;
+          bad_habits?: string | null;
+          updated_at?: string;
         };
         Relationships: [];
       };

@@ -1,0 +1,16 @@
+export const NAV_ITEMS = [
+  { href: "/profile", label: "Profile" },
+  { href: "/home", label: "Home" },
+  { href: "/stats", label: "Stats" },
+  { href: "/training", label: "Training" },
+  { href: "/weight-room", label: "Weight Room" },
+  { href: "/running", label: "Running" },
+  { href: "/nutrition", label: "Nutrition" },
+  { href: "/film-study", label: "Film Study" },
+  { href: "/motivation", label: "Motivation" },
+  { href: "/schedule", label: "Schedule" },
+  { href: "/badges", label: "Badges" },
+  { href: "/secret-ingredient", label: "The Secret Ingredient" },
+  { href: "/community", label: "Community" },
+  { href: "/settings", label: "Settings" },
+] as const;

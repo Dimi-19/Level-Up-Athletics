@@ -26,7 +26,7 @@ export default async function LoginPage({
         )}
 
         <form action={login} className="mt-6 space-y-4">
-          <input type="hidden" name="redirect" value={params.redirect ?? "/dashboard"} />
+          <input type="hidden" name="redirect" value={params.redirect ?? "/home"} />
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-zinc-300">
               Email
