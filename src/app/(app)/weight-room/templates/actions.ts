@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { StagedItem } from "../ExerciseSelector";
+import { generateTemplateExercises, type SplitType } from "@/lib/templateGenerator";
 
 async function currentUserId() {
   const supabase = await createClient();
@@ -32,6 +33,55 @@ export async function createTemplate(name: string, items: StagedItem[]) {
       exercise_id: item.exerciseId,
       position: index,
       superset_group: item.supersetGroup,
+    })),
+  );
+
+  revalidatePath("/weight-room");
+  redirect(`/weight-room/templates/${template.id}`);
+}
+
+export async function generateTemplate({
+  split,
+  exerciseCount,
+  equipment,
+}: {
+  split: SplitType;
+  exerciseCount: number;
+  equipment: string[];
+}) {
+  const { supabase, userId } = await currentUserId();
+
+  const { data: exercises } = await supabase.from("exercises").select("*");
+  const picked = generateTemplateExercises({
+    exercises: exercises ?? [],
+    split,
+    exerciseCount,
+    equipment,
+  });
+
+  if (picked.length === 0) {
+    redirect(
+      `/weight-room/templates/new?error=${encodeURIComponent(
+        "Couldn't find matching exercises — try different equipment or a different split",
+      )}`,
+    );
+  }
+
+  const { data: template, error } = await supabase
+    .from("workout_templates")
+    .insert({ user_id: userId, name: `${split} — ${picked.length} exercises` })
+    .select("id")
+    .single();
+
+  if (error || !template) {
+    redirect(`/weight-room/templates/new?error=${encodeURIComponent(error?.message ?? "Could not create template")}`);
+  }
+
+  await supabase.from("template_exercises").insert(
+    picked.map((exercise, index) => ({
+      template_id: template.id,
+      exercise_id: exercise.id,
+      position: index,
     })),
   );
 

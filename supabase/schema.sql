@@ -43,7 +43,9 @@ create table if not exists public.profiles (
   biological_sex text check (biological_sex in ('male', 'female')),
   primary_goal text check (primary_goal in ('cut', 'maintain', 'bulk')),
   workouts_per_week integer,
-  onboarding_completed boolean not null default false
+  onboarding_completed boolean not null default false,
+  experience_level text check (experience_level in ('beginner', 'intermediate', 'advanced')),
+  equipment_access text[] not null default '{}'
 );
 
 create table if not exists public.teams (

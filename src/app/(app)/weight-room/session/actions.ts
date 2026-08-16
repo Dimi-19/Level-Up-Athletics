@@ -15,6 +15,10 @@ async function currentUserId() {
   return { supabase, userId: user.id };
 }
 
+function fail(message: string): never {
+  redirect(`/weight-room?error=${encodeURIComponent(message)}`);
+}
+
 export async function startSessionFromTemplate(templateId: string) {
   const { supabase, userId } = await currentUserId();
 
@@ -23,7 +27,7 @@ export async function startSessionFromTemplate(templateId: string) {
     .insert({ user_id: userId, template_id: templateId })
     .select("id")
     .single();
-  if (error || !session) return;
+  if (error || !session) fail(error?.message ?? "Could not start session");
 
   const { data: templateExercises } = await supabase
     .from("template_exercises")
@@ -53,7 +57,7 @@ export async function startFreeformSession() {
     .insert({ user_id: userId })
     .select("id")
     .single();
-  if (error || !session) return;
+  if (error || !session) fail(error?.message ?? "Could not start session");
 
   redirect(`/weight-room/session/${session.id}`);
 }
@@ -70,16 +74,14 @@ export async function repeatLastWorkout() {
     .limit(1)
     .maybeSingle();
 
-  if (!lastSession) {
-    redirect("/weight-room");
-  }
+  if (!lastSession) fail("No completed workouts to repeat yet");
 
   const { data: session, error } = await supabase
     .from("workout_sessions")
     .insert({ user_id: userId, template_id: lastSession.template_id })
     .select("id")
     .single();
-  if (error || !session) redirect("/weight-room");
+  if (error || !session) fail(error?.message ?? "Could not start session");
 
   const { data: lastExercises } = await supabase
     .from("session_exercises")
@@ -126,11 +128,18 @@ export async function addExercisesToSession(sessionId: string, items: StagedItem
   revalidatePath(`/weight-room/session/${sessionId}`);
 }
 
-export async function addSet(sessionId: string, sessionExerciseId: string, setNumber: number) {
+export async function addSet(
+  sessionId: string,
+  sessionExerciseId: string,
+  setNumber: number,
+  prefill?: { weight: number | null; reps: number | null },
+) {
   const { supabase } = await currentUserId();
   await supabase.from("session_sets").insert({
     session_exercise_id: sessionExerciseId,
     set_number: setNumber,
+    weight: prefill?.weight ?? null,
+    reps: prefill?.reps ?? null,
   });
   revalidatePath(`/weight-room/session/${sessionId}`);
 }

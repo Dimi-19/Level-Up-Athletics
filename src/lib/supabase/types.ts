@@ -8,6 +8,7 @@ export type TimeFormat = "12h" | "24h";
 export type ReadinessLevel = "low" | "medium" | "high";
 export type BiologicalSex = "male" | "female";
 export type PrimaryGoal = "cut" | "maintain" | "bulk";
+export type ExperienceLevel = "beginner" | "intermediate" | "advanced";
 export type MuscleGroup =
   | "Chest"
   | "Back"
@@ -58,6 +59,8 @@ export type Database = {
           primary_goal: PrimaryGoal | null;
           workouts_per_week: number | null;
           onboarding_completed: boolean;
+          experience_level: ExperienceLevel | null;
+          equipment_access: string[];
         };
         Insert: {
           id: string;
@@ -93,6 +96,8 @@ export type Database = {
           primary_goal?: PrimaryGoal | null;
           workouts_per_week?: number | null;
           onboarding_completed?: boolean;
+          experience_level?: ExperienceLevel | null;
+          equipment_access?: string[];
         };
         Relationships: [];
       };

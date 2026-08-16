@@ -3,7 +3,23 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { calculateMacroTargets } from "@/lib/nutrition";
-import type { BiologicalSex, PrimaryGoal } from "@/lib/supabase/types";
+import type { BiologicalSex, ExperienceLevel, PrimaryGoal } from "@/lib/supabase/types";
+
+export interface OnboardingData {
+  sport: string;
+  position: string;
+  favoritePlayer: string;
+  favoriteTeam: string;
+  experienceLevel: ExperienceLevel | null;
+  equipmentAccess: string[];
+  workoutsPerWeek: number | null;
+  primaryGoal: PrimaryGoal;
+  age: number | null;
+  biologicalSex: BiologicalSex | null;
+  heightCm: number | null;
+  weightKg: number | null;
+  dietaryRestriction: string;
+}
 
 async function currentUserId() {
   const supabase = await createClient();
@@ -14,50 +30,39 @@ async function currentUserId() {
   return { supabase, userId: user.id };
 }
 
-export async function completeOnboarding(formData: FormData) {
+export async function completeOnboarding(data: OnboardingData) {
   const { supabase, userId } = await currentUserId();
 
-  const sport = String(formData.get("sport") ?? "").trim();
-  const position = String(formData.get("position") ?? "").trim();
-  const favoritePlayer = String(formData.get("favoritePlayer") ?? "").trim();
-  const favoriteTeam = String(formData.get("favoriteTeam") ?? "").trim();
-  const dietaryRestriction = String(formData.get("dietaryRestriction") ?? "").trim();
-  const biologicalSex = (String(formData.get("biologicalSex") ?? "") || null) as BiologicalSex | null;
-  const primaryGoal = String(formData.get("primaryGoal") ?? "maintain") as PrimaryGoal;
-
-  const age = Number(formData.get("age"));
-  const heightCm = Number(formData.get("heightCm"));
-  const weightKg = Number(formData.get("weightKg"));
-  const workoutsPerWeek = Number(formData.get("workoutsPerWeek"));
-
   const hasBodyStats =
-    Number.isFinite(age) && age > 0 && Number.isFinite(heightCm) && heightCm > 0 && Number.isFinite(weightKg) && weightKg > 0;
+    !!data.age && data.age > 0 && !!data.heightCm && data.heightCm > 0 && !!data.weightKg && data.weightKg > 0;
 
   const macros = hasBodyStats
     ? calculateMacroTargets({
-        sex: biologicalSex,
-        age,
-        heightCm,
-        weightKg,
-        goal: primaryGoal,
-        workoutsPerWeek: Number.isFinite(workoutsPerWeek) ? workoutsPerWeek : 3,
+        sex: data.biologicalSex,
+        age: data.age!,
+        heightCm: data.heightCm!,
+        weightKg: data.weightKg!,
+        goal: data.primaryGoal,
+        workoutsPerWeek: data.workoutsPerWeek ?? 3,
       })
     : null;
 
   await supabase
     .from("profiles")
     .update({
-      sport: sport || null,
-      position: position || null,
-      favorite_player: favoritePlayer || null,
-      favorite_team: favoriteTeam || null,
-      dietary_restriction: dietaryRestriction || null,
-      biological_sex: biologicalSex,
-      primary_goal: primaryGoal,
-      age: hasBodyStats ? age : null,
-      height_cm: hasBodyStats ? heightCm : null,
-      weight_kg: hasBodyStats ? weightKg : null,
-      workouts_per_week: Number.isFinite(workoutsPerWeek) ? workoutsPerWeek : null,
+      sport: data.sport || null,
+      position: data.position || null,
+      favorite_player: data.favoritePlayer || null,
+      favorite_team: data.favoriteTeam || null,
+      experience_level: data.experienceLevel,
+      equipment_access: data.equipmentAccess,
+      dietary_restriction: data.dietaryRestriction || null,
+      biological_sex: data.biologicalSex,
+      primary_goal: data.primaryGoal,
+      age: hasBodyStats ? data.age : null,
+      height_cm: hasBodyStats ? data.heightCm : null,
+      weight_kg: hasBodyStats ? data.weightKg : null,
+      workouts_per_week: data.workoutsPerWeek,
       nutrition_calories: macros?.calories ?? null,
       nutrition_protein_g: macros?.protein ?? null,
       nutrition_carbs_g: macros?.carbs ?? null,

@@ -76,27 +76,39 @@ export function ActiveSession({
   const elapsedMs = now - new Date(startedAt).getTime();
   const restRemainingMs = restEndsAt ? restEndsAt - now : 0;
 
-  function getDraft(setId: string) {
-    return draftValues[setId] ?? { weight: "", reps: "" };
+  function getDraft(set: ExerciseWithSets["sets"][number]) {
+    return (
+      draftValues[set.id] ?? {
+        weight: set.weight != null ? String(set.weight) : "",
+        reps: set.reps != null ? String(set.reps) : "",
+      }
+    );
   }
 
-  function updateDraft(setId: string, field: "weight" | "reps", value: string) {
-    setDraftValues((prev) => ({ ...prev, [setId]: { ...getDraft(setId), [field]: value } }));
+  function updateDraft(set: ExerciseWithSets["sets"][number], field: "weight" | "reps", value: string) {
+    setDraftValues((prev) => ({ ...prev, [set.id]: { ...getDraft(set), [field]: value } }));
   }
 
-  function handleAddSet(sessionExerciseId: string, sets: ExerciseWithSets["sets"]) {
+  function handleAddSet(exercise: ExerciseWithSets) {
+    const { sets, previous } = exercise;
     const nextSetNumber = sets.length > 0 ? Math.max(...sets.map((s) => s.setNumber)) + 1 : 1;
+    const lastConfirmed = [...sets].reverse().find((s) => s.isConfirmed);
+    const prefill = lastConfirmed
+      ? { weight: lastConfirmed.weight, reps: lastConfirmed.reps }
+      : previous
+        ? { weight: previous.weight, reps: previous.reps }
+        : undefined;
     startTransition(() => {
-      addSet(sessionId, sessionExerciseId, nextSetNumber);
+      addSet(sessionId, exercise.sessionExerciseId, nextSetNumber, prefill);
     });
   }
 
-  function handleConfirm(setId: string) {
-    const draft = getDraft(setId);
+  function handleConfirm(set: ExerciseWithSets["sets"][number]) {
+    const draft = getDraft(set);
     const weight = draft.weight ? Number(draft.weight) : null;
     const reps = draft.reps ? Number(draft.reps) : null;
     startTransition(() => {
-      confirmSet(sessionId, setId, weight, reps);
+      confirmSet(sessionId, set.id, weight, reps);
     });
     setRestEndsAt(Date.now() + REST_DURATION_MS);
   }
@@ -190,16 +202,16 @@ export function ActiveSession({
                           <td className="py-1 pr-2">
                             <input
                               type="number"
-                              value={getDraft(set.id).weight}
-                              onChange={(e) => updateDraft(set.id, "weight", e.target.value)}
+                              value={getDraft(set).weight}
+                              onChange={(e) => updateDraft(set, "weight", e.target.value)}
                               className="w-16 rounded border border-zinc-700 bg-zinc-900 px-2 py-1 text-white"
                             />
                           </td>
                           <td className="py-1 pr-2">
                             <input
                               type="number"
-                              value={getDraft(set.id).reps}
-                              onChange={(e) => updateDraft(set.id, "reps", e.target.value)}
+                              value={getDraft(set).reps}
+                              onChange={(e) => updateDraft(set, "reps", e.target.value)}
                               className="w-14 rounded border border-zinc-700 bg-zinc-900 px-2 py-1 text-white"
                             />
                           </td>
@@ -220,7 +232,7 @@ export function ActiveSession({
                         ) : (
                           <button
                             type="button"
-                            onClick={() => handleConfirm(set.id)}
+                            onClick={() => handleConfirm(set)}
                             disabled={isPending}
                             className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-emerald-500 text-emerald-500 hover:bg-emerald-500 hover:text-black disabled:opacity-50"
                             title="Confirm set"
@@ -238,7 +250,7 @@ export function ActiveSession({
 
           <button
             type="button"
-            onClick={() => handleAddSet(exercise.sessionExerciseId, exercise.sets)}
+            onClick={() => handleAddSet(exercise)}
             disabled={isPending}
             className="mt-3 rounded-md border border-zinc-700 px-3 py-1.5 text-sm text-zinc-300 hover:border-zinc-500 hover:text-white"
           >
