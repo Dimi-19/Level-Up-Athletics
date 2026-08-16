@@ -8,6 +8,20 @@ export type TimeFormat = "12h" | "24h";
 export type ReadinessLevel = "low" | "medium" | "high";
 export type BiologicalSex = "male" | "female";
 export type PrimaryGoal = "cut" | "maintain" | "bulk";
+export type MuscleGroup =
+  | "Chest"
+  | "Back"
+  | "Shoulders"
+  | "Quads"
+  | "Hamstrings/Glutes"
+  | "Calves"
+  | "Biceps"
+  | "Triceps"
+  | "Core"
+  | "Olympic/Power"
+  | "Full Body/Functional"
+  | "Explosive/Plyometric";
+export type SetType = "normal" | "warmup" | "failure" | "dropset";
 
 export type Database = {
   public: {
@@ -287,6 +301,141 @@ export type Database = {
           notes?: string | null;
           duration_minutes?: number | null;
           performed_at?: string;
+        };
+        Relationships: [];
+      };
+      exercises: {
+        Row: {
+          id: string;
+          name: string;
+          muscle_group: MuscleGroup;
+          primary_muscles: string;
+          secondary_muscles: string | null;
+          equipment: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          muscle_group: MuscleGroup;
+          primary_muscles: string;
+          secondary_muscles?: string | null;
+          equipment: string;
+        };
+        Update: Record<string, never>;
+        Relationships: [];
+      };
+      workout_templates: {
+        Row: {
+          id: string;
+          user_id: string;
+          name: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          name: string;
+          created_at?: string;
+        };
+        Update: {
+          name?: string;
+        };
+        Relationships: [];
+      };
+      template_exercises: {
+        Row: {
+          id: string;
+          template_id: string;
+          exercise_id: string;
+          position: number;
+          superset_group: number | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          template_id: string;
+          exercise_id: string;
+          position?: number;
+          superset_group?: number | null;
+          created_at?: string;
+        };
+        Update: {
+          position?: number;
+          superset_group?: number | null;
+        };
+        Relationships: [];
+      };
+      workout_sessions: {
+        Row: {
+          id: string;
+          user_id: string;
+          template_id: string | null;
+          started_at: string;
+          ended_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          template_id?: string | null;
+          started_at?: string;
+          ended_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          ended_at?: string | null;
+        };
+        Relationships: [];
+      };
+      session_exercises: {
+        Row: {
+          id: string;
+          session_id: string;
+          exercise_id: string;
+          position: number;
+          superset_group: number | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          session_id: string;
+          exercise_id: string;
+          position?: number;
+          superset_group?: number | null;
+          created_at?: string;
+        };
+        Update: {
+          position?: number;
+          superset_group?: number | null;
+        };
+        Relationships: [];
+      };
+      session_sets: {
+        Row: {
+          id: string;
+          session_exercise_id: string;
+          set_number: number;
+          weight: number | null;
+          reps: number | null;
+          set_type: SetType;
+          is_confirmed: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          session_exercise_id: string;
+          set_number: number;
+          weight?: number | null;
+          reps?: number | null;
+          set_type?: SetType;
+          is_confirmed?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          weight?: number | null;
+          reps?: number | null;
+          set_type?: SetType;
+          is_confirmed?: boolean;
         };
         Relationships: [];
       };
