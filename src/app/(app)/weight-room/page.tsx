@@ -4,6 +4,7 @@ import { startFreeformSession, repeatLastWorkout } from "./session/actions";
 import { computeVolumeScore, tierForScore, nextTier, MUSCLE_GROUP_TIERS, OVERALL_TIERS } from "@/lib/rank";
 import { MUSCLE_GROUPS, slugForMuscleGroup } from "@/lib/muscleGroups";
 import { getConfirmedSetsByExercise } from "@/lib/weightRoomStats";
+import { BodyTracking } from "./BodyTracking";
 import type { MuscleGroup } from "@/lib/supabase/types";
 
 export default async function WeightRoomPage({
@@ -11,7 +12,7 @@ export default async function WeightRoomPage({
 }: {
   searchParams: Promise<{ error?: string }>;
 }) {
-  const { supabase, user } = await requireUser();
+  const { supabase, user, profile } = await requireUser();
   const params = await searchParams;
 
   const [{ data: templates }, { data: hasCompletedSession }] = await Promise.all([
@@ -149,6 +150,8 @@ export default async function WeightRoomPage({
           {(templates ?? []).length === 0 && <p className="text-sm text-zinc-500">No templates yet.</p>}
         </ul>
       </section>
+
+      <BodyTracking supabase={supabase} userId={user.id} unitsWeight={profile?.units_weight ?? "lb"} />
     </div>
   );
 }

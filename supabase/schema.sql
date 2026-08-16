@@ -874,3 +874,39 @@ insert into public.exercises (name, muscle_group, primary_muscles, secondary_mus
   ('Reactive Broad Jump', 'Explosive/Plyometric', 'Glutes, Quads', 'Calves', 'Bodyweight'),
   ('Consecutive Box Jumps', 'Explosive/Plyometric', 'Quads, Glutes', 'Calves', 'Bodyweight')
 on conflict (name) do nothing;
+
+-- ============================================================
+-- Body tracking (weight & body fat over time)
+-- ============================================================
+
+create table if not exists public.body_metrics (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles (id) on delete cascade,
+  recorded_at date not null default current_date,
+  weight_kg numeric,
+  body_fat_pct numeric,
+  created_at timestamptz not null default now(),
+  unique (user_id, recorded_at)
+);
+
+alter table public.body_metrics enable row level security;
+
+create policy "users can view their own body metrics"
+  on public.body_metrics for select
+  to authenticated
+  using (user_id = auth.uid());
+
+create policy "users can log their own body metrics"
+  on public.body_metrics for insert
+  to authenticated
+  with check (user_id = auth.uid());
+
+create policy "users can update their own body metrics"
+  on public.body_metrics for update
+  to authenticated
+  using (user_id = auth.uid());
+
+create policy "users can delete their own body metrics"
+  on public.body_metrics for delete
+  to authenticated
+  using (user_id = auth.uid());

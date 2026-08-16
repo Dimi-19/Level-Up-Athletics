@@ -444,6 +444,29 @@ export type Database = {
         };
         Relationships: [];
       };
+      body_metrics: {
+        Row: {
+          id: string;
+          user_id: string;
+          recorded_at: string;
+          weight_kg: number | null;
+          body_fat_pct: number | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          recorded_at?: string;
+          weight_kg?: number | null;
+          body_fat_pct?: number | null;
+          created_at?: string;
+        };
+        Update: {
+          weight_kg?: number | null;
+          body_fat_pct?: number | null;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
