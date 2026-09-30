@@ -17,7 +17,7 @@ async function currentUserId() {
 export async function updateUnits(formData: FormData) {
   const { supabase, userId } = await currentUserId();
 
-  await supabase
+  const { error } = await supabase
     .from("profiles")
     .update({
       units_weight: String(formData.get("unitsWeight")) as WeightUnit,
@@ -26,13 +26,14 @@ export async function updateUnits(formData: FormData) {
     })
     .eq("id", userId);
 
+  if (error) redirect(`/settings?error=${encodeURIComponent(error.message)}`);
   revalidatePath("/settings");
 }
 
 export async function updateNotifications(formData: FormData) {
   const { supabase, userId } = await currentUserId();
 
-  await supabase
+  const { error } = await supabase
     .from("profiles")
     .update({
       notif_session_reminders: formData.get("sessionReminders") === "on",
@@ -41,13 +42,14 @@ export async function updateNotifications(formData: FormData) {
     })
     .eq("id", userId);
 
+  if (error) redirect(`/settings?error=${encodeURIComponent(error.message)}`);
   revalidatePath("/settings");
 }
 
 export async function updateIntegrations(formData: FormData) {
   const { supabase, userId } = await currentUserId();
 
-  await supabase
+  const { error } = await supabase
     .from("profiles")
     .update({
       whoop_sync_enabled: formData.get("whoopSync") === "on",
@@ -55,6 +57,7 @@ export async function updateIntegrations(formData: FormData) {
     })
     .eq("id", userId);
 
+  if (error) redirect(`/settings?error=${encodeURIComponent(error.message)}`);
   revalidatePath("/settings");
 }
 
@@ -66,7 +69,7 @@ export async function updateNutritionTargets(formData: FormData) {
     return value && !Number.isNaN(n) ? n : null;
   };
 
-  await supabase
+  const { error } = await supabase
     .from("profiles")
     .update({
       dietary_restriction: String(formData.get("dietaryRestriction") ?? "") || null,
@@ -78,6 +81,7 @@ export async function updateNutritionTargets(formData: FormData) {
     })
     .eq("id", userId);
 
+  if (error) redirect(`/settings?error=${encodeURIComponent(error.message)}`);
   revalidatePath("/settings");
   revalidatePath("/home");
 }
@@ -85,11 +89,12 @@ export async function updateNutritionTargets(formData: FormData) {
 export async function updateVisibility(formData: FormData) {
   const { supabase, userId } = await currentUserId();
 
-  await supabase
+  const { error } = await supabase
     .from("profiles")
     .update({ profile_visibility: String(formData.get("visibility")) as ProfileVisibility })
     .eq("id", userId);
 
+  if (error) redirect(`/settings?error=${encodeURIComponent(error.message)}`);
   revalidatePath("/settings");
 }
 

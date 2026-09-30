@@ -3,11 +3,14 @@ import { createWorkout, logWorkout, deleteWorkoutLog } from "./actions";
 
 export default async function WorkoutsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ teamId: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
   const { teamId } = await params;
   const { supabase, user } = await requireUser();
+  const sp = await searchParams;
 
   const [{ data: workouts }, { data: myLogs }] = await Promise.all([
     supabase
@@ -28,6 +31,11 @@ export default async function WorkoutsPage({
 
   return (
     <div className="space-y-8">
+      {sp.error && (
+        <p className="rounded-md border border-red-800 bg-red-950 px-3 py-2 text-sm text-red-300">
+          {sp.error}
+        </p>
+      )}
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="rounded-lg border border-zinc-800 bg-zinc-950 p-5">
           <h2 className="font-semibold text-white">Team workouts</h2>

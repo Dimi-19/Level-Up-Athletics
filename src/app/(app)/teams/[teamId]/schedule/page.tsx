@@ -28,11 +28,14 @@ function formatEventTime(iso: string) {
 
 export default async function SchedulePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ teamId: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
   const { teamId } = await params;
   const { supabase, user } = await requireUser();
+  const sp = await searchParams;
 
   const membership = await getTeamMembership(supabase, teamId, user.id);
   const isLeader = membership?.role === "coach" || membership?.role === "captain";
@@ -63,6 +66,11 @@ export default async function SchedulePage({
 
   return (
     <div className="space-y-8">
+      {sp.error && (
+        <p className="rounded-md border border-red-800 bg-red-950 px-3 py-2 text-sm text-red-300">
+          {sp.error}
+        </p>
+      )}
       <div className="rounded-lg border border-zinc-800 bg-zinc-950 p-5">
         <h2 className="font-semibold text-white">Schedule an event</h2>
         <form action={boundCreateEvent} className="mt-4 grid gap-3 sm:grid-cols-2">

@@ -25,9 +25,13 @@ export async function createTemplate(name: string, items: StagedItem[]) {
     .select("id")
     .single();
 
-  if (error || !template) return;
+  if (error || !template) {
+    redirect(
+      `/weight-room/templates/new?mode=custom&error=${encodeURIComponent(error?.message ?? "Could not create template")}`,
+    );
+  }
 
-  await supabase.from("template_exercises").insert(
+  const { error: exercisesError } = await supabase.from("template_exercises").insert(
     items.map((item, index) => ({
       template_id: template.id,
       exercise_id: item.exerciseId,
@@ -35,6 +39,10 @@ export async function createTemplate(name: string, items: StagedItem[]) {
       superset_group: item.supersetGroup,
     })),
   );
+
+  if (exercisesError) {
+    redirect(`/weight-room/templates/new?mode=custom&error=${encodeURIComponent(exercisesError.message)}`);
+  }
 
   revalidatePath("/weight-room");
   redirect(`/weight-room/templates/${template.id}`);
@@ -77,13 +85,17 @@ export async function generateTemplate({
     redirect(`/weight-room/templates/new?error=${encodeURIComponent(error?.message ?? "Could not create template")}`);
   }
 
-  await supabase.from("template_exercises").insert(
+  const { error: exercisesError } = await supabase.from("template_exercises").insert(
     picked.map((exercise, index) => ({
       template_id: template.id,
       exercise_id: exercise.id,
       position: index,
     })),
   );
+
+  if (exercisesError) {
+    redirect(`/weight-room/templates/new?error=${encodeURIComponent(exercisesError.message)}`);
+  }
 
   revalidatePath("/weight-room");
   redirect(`/weight-room/templates/${template.id}`);
@@ -102,7 +114,7 @@ export async function addTemplateExercises(templateId: string, items: StagedItem
 
   const startPosition = (existing?.[0]?.position ?? -1) + 1;
 
-  await supabase.from("template_exercises").insert(
+  const { error } = await supabase.from("template_exercises").insert(
     items.map((item, index) => ({
       template_id: templateId,
       exercise_id: item.exerciseId,
@@ -111,12 +123,14 @@ export async function addTemplateExercises(templateId: string, items: StagedItem
     })),
   );
 
+  if (error) redirect(`/weight-room/templates/${templateId}?error=${encodeURIComponent(error.message)}`);
   revalidatePath(`/weight-room/templates/${templateId}`);
 }
 
 export async function removeTemplateExercise(templateId: string, templateExerciseId: string) {
   const { supabase } = await currentUserId();
-  await supabase.from("template_exercises").delete().eq("id", templateExerciseId);
+  const { error } = await supabase.from("template_exercises").delete().eq("id", templateExerciseId);
+  if (error) redirect(`/weight-room/templates/${templateId}?error=${encodeURIComponent(error.message)}`);
   revalidatePath(`/weight-room/templates/${templateId}`);
 }
 
@@ -124,14 +138,16 @@ export async function renameTemplate(templateId: string, formData: FormData) {
   const { supabase } = await currentUserId();
   const name = String(formData.get("name") ?? "").trim();
   if (!name) return;
-  await supabase.from("workout_templates").update({ name }).eq("id", templateId);
+  const { error } = await supabase.from("workout_templates").update({ name }).eq("id", templateId);
+  if (error) redirect(`/weight-room/templates/${templateId}?error=${encodeURIComponent(error.message)}`);
   revalidatePath(`/weight-room/templates/${templateId}`);
   revalidatePath("/weight-room");
 }
 
 export async function deleteTemplate(templateId: string) {
   const { supabase } = await currentUserId();
-  await supabase.from("workout_templates").delete().eq("id", templateId);
+  const { error } = await supabase.from("workout_templates").delete().eq("id", templateId);
+  if (error) redirect(`/weight-room/templates/${templateId}?error=${encodeURIComponent(error.message)}`);
   revalidatePath("/weight-room");
   redirect("/weight-room");
 }

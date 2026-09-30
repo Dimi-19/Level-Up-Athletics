@@ -15,13 +15,14 @@ export async function createWorkout(teamId: string, formData: FormData) {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  await supabase.from("workouts").insert({
+  const { error } = await supabase.from("workouts").insert({
     team_id: teamId,
     title,
     description: description || null,
     created_by: user.id,
   });
 
+  if (error) redirect(`/teams/${teamId}/workouts?error=${encodeURIComponent(error.message)}`);
   revalidatePath(`/teams/${teamId}/workouts`);
 }
 
@@ -40,7 +41,7 @@ export async function logWorkout(teamId: string, formData: FormData) {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  await supabase.from("workout_logs").insert({
+  const { error } = await supabase.from("workout_logs").insert({
     team_id: teamId,
     user_id: user.id,
     workout_id: workoutId,
@@ -50,13 +51,15 @@ export async function logWorkout(teamId: string, formData: FormData) {
     notes: notes || null,
   });
 
+  if (error) redirect(`/teams/${teamId}/workouts?error=${encodeURIComponent(error.message)}`);
   revalidatePath(`/teams/${teamId}/workouts`);
   revalidatePath("/home");
 }
 
 export async function deleteWorkoutLog(teamId: string, logId: string) {
   const supabase = await createClient();
-  await supabase.from("workout_logs").delete().eq("id", logId);
+  const { error } = await supabase.from("workout_logs").delete().eq("id", logId);
+  if (error) redirect(`/teams/${teamId}/workouts?error=${encodeURIComponent(error.message)}`);
   revalidatePath(`/teams/${teamId}/workouts`);
   revalidatePath("/home");
 }

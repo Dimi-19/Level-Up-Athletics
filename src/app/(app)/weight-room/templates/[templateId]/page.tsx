@@ -6,11 +6,14 @@ import { AddExercises } from "./AddExercises";
 
 export default async function TemplateDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ templateId: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
   const { templateId } = await params;
   const { supabase } = await requireUser();
+  const sp = await searchParams;
 
   const { data: template } = await supabase
     .from("workout_templates")
@@ -32,6 +35,11 @@ export default async function TemplateDetailPage({
 
   return (
     <div className="space-y-6">
+      {sp.error && (
+        <p className="rounded-md border border-red-800 bg-red-950 px-3 py-2 text-sm text-red-300">
+          {sp.error}
+        </p>
+      )}
       <form action={renameTemplate.bind(null, templateId)} className="flex items-center gap-2">
         <input
           name="name"

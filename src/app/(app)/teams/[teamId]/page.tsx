@@ -4,11 +4,14 @@ import { RoleSelect } from "./RoleSelect";
 
 export default async function TeamRosterPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ teamId: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
   const { teamId } = await params;
   const { supabase, user } = await requireUser();
+  const sp = await searchParams;
 
   const { data: members } = await supabase
     .from("team_members")
@@ -28,6 +31,11 @@ export default async function TeamRosterPage({
 
   return (
     <div>
+      {sp.error && (
+        <p className="mb-4 rounded-md border border-red-800 bg-red-950 px-3 py-2 text-sm text-red-300">
+          {sp.error}
+        </p>
+      )}
       <h2 className="font-semibold text-white">Roster ({memberList.length})</h2>
       <ul className="mt-4 divide-y divide-zinc-800 rounded-lg border border-zinc-800 bg-zinc-950">
         {memberList.map((member) => (

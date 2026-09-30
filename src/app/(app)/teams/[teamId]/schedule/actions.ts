@@ -20,7 +20,7 @@ export async function createEvent(teamId: string, formData: FormData) {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  await supabase.from("events").insert({
+  const { error } = await supabase.from("events").insert({
     team_id: teamId,
     title,
     type,
@@ -30,13 +30,15 @@ export async function createEvent(teamId: string, formData: FormData) {
     created_by: user.id,
   });
 
+  if (error) redirect(`/teams/${teamId}/schedule?error=${encodeURIComponent(error.message)}`);
   revalidatePath(`/teams/${teamId}/schedule`);
   revalidatePath("/home");
 }
 
 export async function deleteEvent(teamId: string, eventId: string) {
   const supabase = await createClient();
-  await supabase.from("events").delete().eq("id", eventId);
+  const { error } = await supabase.from("events").delete().eq("id", eventId);
+  if (error) redirect(`/teams/${teamId}/schedule?error=${encodeURIComponent(error.message)}`);
   revalidatePath(`/teams/${teamId}/schedule`);
   revalidatePath("/home");
 }
@@ -48,9 +50,10 @@ export async function setRsvp(teamId: string, eventId: string, status: RsvpStatu
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  await supabase
+  const { error } = await supabase
     .from("event_rsvps")
     .upsert({ event_id: eventId, user_id: user.id, status }, { onConflict: "event_id,user_id" });
 
+  if (error) redirect(`/teams/${teamId}/schedule?error=${encodeURIComponent(error.message)}`);
   revalidatePath(`/teams/${teamId}/schedule`);
 }

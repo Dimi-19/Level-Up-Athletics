@@ -47,7 +47,7 @@ export async function completeOnboarding(data: OnboardingData) {
       })
     : null;
 
-  await supabase
+  const { error } = await supabase
     .from("profiles")
     .update({
       sport: data.sport || null,
@@ -71,11 +71,13 @@ export async function completeOnboarding(data: OnboardingData) {
     })
     .eq("id", userId);
 
+  if (error) redirect(`/onboarding?error=${encodeURIComponent(error.message)}`);
   redirect("/home");
 }
 
 export async function skipOnboarding() {
   const { supabase, userId } = await currentUserId();
-  await supabase.from("profiles").update({ onboarding_completed: true }).eq("id", userId);
+  const { error } = await supabase.from("profiles").update({ onboarding_completed: true }).eq("id", userId);
+  if (error) redirect(`/onboarding?error=${encodeURIComponent(error.message)}`);
   redirect("/home");
 }

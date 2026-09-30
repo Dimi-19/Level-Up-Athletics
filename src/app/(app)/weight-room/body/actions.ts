@@ -28,7 +28,7 @@ export async function logBodyMetric(formData: FormData) {
 
   if (weightKg == null && bodyFatPct == null) return;
 
-  await supabase.from("body_metrics").upsert(
+  const { error } = await supabase.from("body_metrics").upsert(
     {
       user_id: user.id,
       recorded_at: recordedAt,
@@ -38,11 +38,13 @@ export async function logBodyMetric(formData: FormData) {
     { onConflict: "user_id,recorded_at" },
   );
 
-  revalidatePath("/weight-room");
+  if (error) redirect(`/weight-room/progress?error=${encodeURIComponent(error.message)}`);
+  revalidatePath("/weight-room/progress");
 }
 
 export async function deleteBodyMetric(id: string) {
   const supabase = await createClient();
-  await supabase.from("body_metrics").delete().eq("id", id);
-  revalidatePath("/weight-room");
+  const { error } = await supabase.from("body_metrics").delete().eq("id", id);
+  if (error) redirect(`/weight-room/progress?error=${encodeURIComponent(error.message)}`);
+  revalidatePath("/weight-room/progress");
 }

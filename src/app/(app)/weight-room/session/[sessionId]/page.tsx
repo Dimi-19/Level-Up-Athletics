@@ -4,11 +4,14 @@ import { ActiveSession, type ExerciseWithSets } from "./ActiveSession";
 
 export default async function SessionPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ sessionId: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
   const { sessionId } = await params;
   const { supabase } = await requireUser();
+  const sp = await searchParams;
 
   const { data: session } = await supabase
     .from("workout_sessions")
@@ -118,11 +121,18 @@ export default async function SessionPage({
   }));
 
   return (
-    <ActiveSession
-      sessionId={sessionId}
-      startedAt={session.started_at}
-      initialExercises={exercisesWithSets}
-      allExercises={allExercises ?? []}
-    />
+    <div className="space-y-4">
+      {sp.error && (
+        <p className="rounded-md border border-red-800 bg-red-950 px-3 py-2 text-sm text-red-300">
+          {sp.error}
+        </p>
+      )}
+      <ActiveSession
+        sessionId={sessionId}
+        startedAt={session.started_at}
+        initialExercises={exercisesWithSets}
+        allExercises={allExercises ?? []}
+      />
+    </div>
   );
 }

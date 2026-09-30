@@ -19,6 +19,10 @@ function fail(message: string): never {
   redirect(`/weight-room?error=${encodeURIComponent(message)}`);
 }
 
+function failSession(sessionId: string, message: string): never {
+  redirect(`/weight-room/session/${sessionId}?error=${encodeURIComponent(message)}`);
+}
+
 export async function startSessionFromTemplate(templateId: string) {
   const { supabase, userId } = await currentUserId();
 
@@ -36,7 +40,7 @@ export async function startSessionFromTemplate(templateId: string) {
     .order("position", { ascending: true });
 
   if (templateExercises && templateExercises.length > 0) {
-    await supabase.from("session_exercises").insert(
+    const { error: exercisesError } = await supabase.from("session_exercises").insert(
       templateExercises.map((te) => ({
         session_id: session.id,
         exercise_id: te.exercise_id,
@@ -44,6 +48,7 @@ export async function startSessionFromTemplate(templateId: string) {
         superset_group: te.superset_group,
       })),
     );
+    if (exercisesError) fail(exercisesError.message);
   }
 
   redirect(`/weight-room/session/${session.id}`);
@@ -90,7 +95,7 @@ export async function repeatLastWorkout() {
     .order("position", { ascending: true });
 
   if (lastExercises && lastExercises.length > 0) {
-    await supabase.from("session_exercises").insert(
+    const { error: exercisesError } = await supabase.from("session_exercises").insert(
       lastExercises.map((se) => ({
         session_id: session.id,
         exercise_id: se.exercise_id,
@@ -98,6 +103,7 @@ export async function repeatLastWorkout() {
         superset_group: se.superset_group,
       })),
     );
+    if (exercisesError) fail(exercisesError.message);
   }
 
   redirect(`/weight-room/session/${session.id}`);
@@ -116,7 +122,7 @@ export async function addExercisesToSession(sessionId: string, items: StagedItem
 
   const startPosition = (existing?.[0]?.position ?? -1) + 1;
 
-  await supabase.from("session_exercises").insert(
+  const { error } = await supabase.from("session_exercises").insert(
     items.map((item, index) => ({
       session_id: sessionId,
       exercise_id: item.exerciseId,
@@ -125,6 +131,7 @@ export async function addExercisesToSession(sessionId: string, items: StagedItem
     })),
   );
 
+  if (error) failSession(sessionId, error.message);
   revalidatePath(`/weight-room/session/${sessionId}`);
 }
 
@@ -135,39 +142,47 @@ export async function addSet(
   prefill?: { weight: number | null; reps: number | null },
 ) {
   const { supabase } = await currentUserId();
-  await supabase.from("session_sets").insert({
+  const { error } = await supabase.from("session_sets").insert({
     session_exercise_id: sessionExerciseId,
     set_number: setNumber,
     weight: prefill?.weight ?? null,
     reps: prefill?.reps ?? null,
   });
+  if (error) failSession(sessionId, error.message);
   revalidatePath(`/weight-room/session/${sessionId}`);
 }
 
 export async function confirmSet(sessionId: string, setId: string, weight: number | null, reps: number | null) {
   const { supabase } = await currentUserId();
-  await supabase
+  const { error } = await supabase
     .from("session_sets")
     .update({ weight, reps, is_confirmed: true })
     .eq("id", setId);
+  if (error) failSession(sessionId, error.message);
   revalidatePath(`/weight-room/session/${sessionId}`);
 }
 
 export async function cycleSetType(sessionId: string, setId: string, setType: SetType) {
   const { supabase } = await currentUserId();
-  await supabase.from("session_sets").update({ set_type: setType }).eq("id", setId);
+  const { error } = await supabase.from("session_sets").update({ set_type: setType }).eq("id", setId);
+  if (error) failSession(sessionId, error.message);
   revalidatePath(`/weight-room/session/${sessionId}`);
 }
 
 export async function deleteSet(sessionId: string, setId: string) {
   const { supabase } = await currentUserId();
-  await supabase.from("session_sets").delete().eq("id", setId);
+  const { error } = await supabase.from("session_sets").delete().eq("id", setId);
+  if (error) failSession(sessionId, error.message);
   revalidatePath(`/weight-room/session/${sessionId}`);
 }
 
 export async function endSession(sessionId: string) {
   const { supabase } = await currentUserId();
-  await supabase.from("workout_sessions").update({ ended_at: new Date().toISOString() }).eq("id", sessionId);
+  const { error } = await supabase
+    .from("workout_sessions")
+    .update({ ended_at: new Date().toISOString() })
+    .eq("id", sessionId);
+  if (error) failSession(sessionId, error.message);
   revalidatePath("/weight-room");
   redirect("/weight-room");
 }

@@ -2,8 +2,13 @@ import { requireUser } from "@/lib/auth";
 import { longestStreak } from "@/lib/streak";
 import { updateProfile } from "./actions";
 
-export default async function ProfilePage() {
+export default async function ProfilePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
   const { supabase, user, profile } = await requireUser();
+  const params = await searchParams;
 
   const { data: logs } = await supabase
     .from("workout_logs")
@@ -22,6 +27,12 @@ export default async function ProfilePage() {
         <h1 className="text-2xl font-bold text-white">Profile</h1>
         <p className="mt-1 text-sm text-zinc-400">Who you are, on and off the record.</p>
       </div>
+
+      {params.error && (
+        <p className="rounded-md border border-red-800 bg-red-950 px-3 py-2 text-sm text-red-300">
+          {params.error}
+        </p>
+      )}
 
       <section className="rounded-lg border border-zinc-800 bg-zinc-950 p-5">
         <h2 className="font-semibold text-white">Identity</h2>

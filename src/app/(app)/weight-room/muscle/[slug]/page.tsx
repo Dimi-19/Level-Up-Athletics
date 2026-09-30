@@ -37,8 +37,8 @@ export default async function MuscleGroupPage({
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/weight-room" className="text-sm text-zinc-400 hover:text-white">
-          ← Weight Room
+        <Link href="/weight-room/muscles" className="text-sm text-zinc-400 hover:text-white">
+          ← Muscles
         </Link>
         <h1 className="mt-2 text-2xl font-bold text-white">{muscleGroup}</h1>
         <p className="mt-1 text-sm text-zinc-400">Your rank for every {muscleGroup} exercise in the library.</p>

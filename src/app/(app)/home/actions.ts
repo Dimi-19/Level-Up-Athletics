@@ -15,22 +15,25 @@ export async function addGoal(formData: FormData) {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  await supabase.from("goals").insert({ user_id: user.id, title });
+  const { error } = await supabase.from("goals").insert({ user_id: user.id, title });
+  if (error) redirect(`/home?error=${encodeURIComponent(error.message)}`);
   revalidatePath("/home");
 }
 
 export async function toggleGoal(goalId: string, isCompleted: boolean) {
   const supabase = await createClient();
-  await supabase
+  const { error } = await supabase
     .from("goals")
     .update({ is_completed: isCompleted, completed_at: isCompleted ? new Date().toISOString() : null })
     .eq("id", goalId);
+  if (error) redirect(`/home?error=${encodeURIComponent(error.message)}`);
   revalidatePath("/home");
 }
 
 export async function deleteGoal(goalId: string) {
   const supabase = await createClient();
-  await supabase.from("goals").delete().eq("id", goalId);
+  const { error } = await supabase.from("goals").delete().eq("id", goalId);
+  if (error) redirect(`/home?error=${encodeURIComponent(error.message)}`);
   revalidatePath("/home");
 }
 
@@ -47,7 +50,7 @@ export async function saveJournalEntry(formData: FormData) {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  await supabase.from("journal_entries").upsert(
+  const { error } = await supabase.from("journal_entries").upsert(
     {
       user_id: user.id,
       entry_date: entryDate,
@@ -60,5 +63,6 @@ export async function saveJournalEntry(formData: FormData) {
     { onConflict: "user_id,entry_date" },
   );
 
+  if (error) redirect(`/home?error=${encodeURIComponent(error.message)}`);
   revalidatePath("/home");
 }

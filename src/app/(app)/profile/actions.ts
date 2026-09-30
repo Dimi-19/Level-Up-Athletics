@@ -24,7 +24,7 @@ export async function updateProfile(formData: FormData) {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  await supabase
+  const { error } = await supabase
     .from("profiles")
     .update({
       full_name: fullName,
@@ -36,5 +36,6 @@ export async function updateProfile(formData: FormData) {
     })
     .eq("id", user.id);
 
+  if (error) redirect(`/profile?error=${encodeURIComponent(error.message)}`);
   revalidatePath("/profile");
 }
