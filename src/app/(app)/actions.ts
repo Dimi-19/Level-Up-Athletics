@@ -14,7 +14,7 @@ export async function createTeam(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   const sport = String(formData.get("sport") ?? "").trim();
 
-  if (!name) return;
+  if (!name) redirect("/community?error=" + encodeURIComponent("Team name is required."));
 
   const supabase = await createClient();
   const {
@@ -29,16 +29,16 @@ export async function createTeam(formData: FormData) {
     .single();
 
   if (error || !team) {
-    redirect(`/teams?error=${encodeURIComponent(error?.message ?? "Could not create team")}`);
+    redirect(`/community?error=${encodeURIComponent(error?.message ?? "Could not create team")}`);
   }
 
-  revalidatePath("/teams");
+  revalidatePath("/community");
   redirect(`/teams/${team.id}`);
 }
 
 export async function joinTeam(formData: FormData) {
   const inviteCode = String(formData.get("inviteCode") ?? "").trim();
-  if (!inviteCode) return;
+  if (!inviteCode) redirect("/community?error=" + encodeURIComponent("Invite code is required."));
 
   const supabase = await createClient();
   const { data: teamId, error } = await supabase.rpc("join_team_by_code", {
@@ -46,9 +46,9 @@ export async function joinTeam(formData: FormData) {
   });
 
   if (error || !teamId) {
-    redirect(`/teams?error=${encodeURIComponent(error?.message ?? "Invalid invite code")}`);
+    redirect(`/community?error=${encodeURIComponent(error?.message ?? "Invalid invite code")}`);
   }
 
-  revalidatePath("/teams");
+  revalidatePath("/community");
   redirect(`/teams/${teamId}`);
 }

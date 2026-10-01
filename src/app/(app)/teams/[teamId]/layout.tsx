@@ -18,8 +18,8 @@ export default async function TeamLayout({
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/teams" className="text-sm text-zinc-400 hover:text-white">
-          ← All teams
+        <Link href="/community" className="text-sm text-zinc-400 hover:text-white">
+          ← Community
         </Link>
         <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
           <h1 className="text-2xl font-bold text-white">{team.name}</h1>
