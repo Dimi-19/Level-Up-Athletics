@@ -627,6 +627,50 @@ export type Database = {
         Update: Record<string, never>;
         Relationships: [];
       };
+      film_sessions: {
+        Row: {
+          id: string;
+          user_id: string;
+          title: string;
+          video_url: string;
+          opponent: string | null;
+          session_date: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          title: string;
+          video_url: string;
+          opponent?: string | null;
+          session_date?: string;
+          created_at?: string;
+        };
+        Update: Record<string, never>;
+        Relationships: [];
+      };
+      film_clips: {
+        Row: {
+          id: string;
+          film_session_id: string;
+          user_id: string;
+          timestamp_seconds: number;
+          note: string;
+          tag: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          film_session_id: string;
+          user_id: string;
+          timestamp_seconds?: number;
+          note: string;
+          tag?: string | null;
+          created_at?: string;
+        };
+        Update: Record<string, never>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
