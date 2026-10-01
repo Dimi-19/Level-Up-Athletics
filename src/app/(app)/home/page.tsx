@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { getMyTeams } from "@/lib/queries";
+import { getTodaysQuote } from "@/lib/motivation";
+import { BADGES } from "@/lib/badges";
+import { evaluateBadges } from "@/lib/badgeEngine";
 import { addGoal, toggleGoal, deleteGoal, saveJournalEntry } from "./actions";
 
 const READINESS_LEVELS = ["low", "medium", "high"] as const;
@@ -29,7 +32,7 @@ export default async function HomePage({
   const teams = await getMyTeams(supabase, user.id);
   const teamIds = teams.map((t) => t.id);
 
-  const [{ data: todaysEvents }, { data: goals }, { data: journalEntry }] = await Promise.all([
+  const [{ data: todaysEvents }, { data: goals }, { data: journalEntry }, todaysQuote, earnedBadgeIds] = await Promise.all([
     teamIds.length
       ? supabase
           .from("events")
@@ -41,11 +44,14 @@ export default async function HomePage({
       : Promise.resolve({ data: [] }),
     supabase.from("goals").select("*").eq("user_id", user.id).order("created_at", { ascending: true }),
     supabase.from("journal_entries").select("*").eq("user_id", user.id).eq("entry_date", dateKey).maybeSingle(),
+    getTodaysQuote(supabase, profile?.favorite_player),
+    evaluateBadges(supabase, user.id),
   ]);
 
   const hasNutritionTargets = profile?.nutrition_calories != null;
   const openGoals = (goals ?? []).filter((g) => !g.is_completed);
   const doneGoals = (goals ?? []).filter((g) => g.is_completed);
+  const earnedBadges = BADGES.filter((b) => earnedBadgeIds.has(b.id));
 
   return (
     <div className="space-y-8">
@@ -130,13 +136,17 @@ export default async function HomePage({
           className="rounded-lg border border-zinc-800 bg-zinc-950 p-4 hover:border-zinc-600"
         >
           <p className="text-sm text-zinc-400">Motivation</p>
-          <p className="mt-1 text-sm text-zinc-500">
-            &quot;Hard work beats talent when talent doesn&apos;t work hard.&quot;
+          <p className="mt-1 text-sm italic text-zinc-500">
+            {todaysQuote ? `"${todaysQuote.body}"` : "Check out today's quote →"}
           </p>
         </Link>
         <Link href="/badges" className="rounded-lg border border-zinc-800 bg-zinc-950 p-4 hover:border-zinc-600">
-          <p className="text-sm text-zinc-400">Most recent badge</p>
-          <p className="mt-1 text-sm text-zinc-500">No badges yet</p>
+          <p className="text-sm text-zinc-400">Badges</p>
+          <p className="mt-1 text-sm text-zinc-500">
+            {earnedBadges.length > 0
+              ? `${earnedBadges.length} earned — most recent: ${earnedBadges[earnedBadges.length - 1].name}`
+              : "No badges yet"}
+          </p>
         </Link>
       </section>
 

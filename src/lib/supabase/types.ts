@@ -9,6 +9,8 @@ export type ReadinessLevel = "low" | "medium" | "high";
 export type BiologicalSex = "male" | "female";
 export type PrimaryGoal = "cut" | "maintain" | "bulk";
 export type ExperienceLevel = "beginner" | "intermediate" | "advanced";
+export type MotivationContentType = "quote" | "video" | "podcast";
+export type MealType = "breakfast" | "lunch" | "dinner" | "snack";
 export type MuscleGroup =
   | "Chest"
   | "Back"
@@ -465,6 +467,93 @@ export type Database = {
           weight_kg?: number | null;
           body_fat_pct?: number | null;
         };
+        Relationships: [];
+      };
+      motivation_content: {
+        Row: {
+          id: string;
+          content_type: MotivationContentType;
+          body: string | null;
+          author: string | null;
+          url: string | null;
+          tags: string[];
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          content_type: MotivationContentType;
+          body?: string | null;
+          author?: string | null;
+          url?: string | null;
+          tags?: string[];
+          created_at?: string;
+        };
+        Update: Record<string, never>;
+        Relationships: [];
+      };
+      foods: {
+        Row: {
+          id: string;
+          user_id: string;
+          name: string;
+          serving_label: string;
+          calories: number;
+          protein_g: number;
+          carbs_g: number;
+          fat_g: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          name: string;
+          serving_label?: string;
+          calories?: number;
+          protein_g?: number;
+          carbs_g?: number;
+          fat_g?: number;
+          created_at?: string;
+        };
+        Update: {
+          name?: string;
+          serving_label?: string;
+          calories?: number;
+          protein_g?: number;
+          carbs_g?: number;
+          fat_g?: number;
+        };
+        Relationships: [];
+      };
+      meal_logs: {
+        Row: {
+          id: string;
+          user_id: string;
+          food_id: string | null;
+          logged_date: string;
+          meal_type: MealType;
+          name: string;
+          servings: number;
+          calories: number;
+          protein_g: number;
+          carbs_g: number;
+          fat_g: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          food_id?: string | null;
+          logged_date?: string;
+          meal_type: MealType;
+          name: string;
+          servings?: number;
+          calories?: number;
+          protein_g?: number;
+          carbs_g?: number;
+          fat_g?: number;
+          created_at?: string;
+        };
+        Update: Record<string, never>;
         Relationships: [];
       };
     };
