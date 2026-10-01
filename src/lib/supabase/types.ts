@@ -12,6 +12,7 @@ export type ExperienceLevel = "beginner" | "intermediate" | "advanced";
 export type MotivationContentType = "quote" | "video" | "podcast";
 export type MealType = "breakfast" | "lunch" | "dinner" | "snack";
 export type SkillCategory = "reps" | "timed" | "rating" | "binary" | "notes";
+export type ScheduledSessionType = "weight_room" | "run" | "skill" | "game" | "film_study" | "rest";
 export type MuscleGroup =
   | "Chest"
   | "Back"
@@ -669,6 +670,34 @@ export type Database = {
           created_at?: string;
         };
         Update: Record<string, never>;
+        Relationships: [];
+      };
+      scheduled_sessions: {
+        Row: {
+          id: string;
+          user_id: string;
+          scheduled_date: string;
+          session_type: ScheduledSessionType;
+          title: string | null;
+          notes: string | null;
+          is_completed: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          scheduled_date: string;
+          session_type: ScheduledSessionType;
+          title?: string | null;
+          notes?: string | null;
+          is_completed?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          is_completed?: boolean;
+          title?: string | null;
+          notes?: string | null;
+        };
         Relationships: [];
       };
     };
