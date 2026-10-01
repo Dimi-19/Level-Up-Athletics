@@ -13,6 +13,19 @@ export type MotivationContentType = "quote" | "video" | "podcast";
 export type MealType = "breakfast" | "lunch" | "dinner" | "snack";
 export type SkillCategory = "reps" | "timed" | "rating" | "binary" | "notes";
 export type ScheduledSessionType = "weight_room" | "run" | "skill" | "game" | "film_study" | "rest";
+
+export interface PassportSnapshot {
+  fullName: string;
+  sport: string | null;
+  position: string | null;
+  generatedAt: string;
+  weightRoom: { tierName: string; tierColor: string } | null;
+  topLifts: { exerciseName: string; weightKg: number; reps: number }[];
+  runningPrs: { label: string; durationSeconds: number }[];
+  skillRanks: { sport: string; name: string; tierName: string; tierColor: string; count: number }[];
+  badges: { name: string; category: string }[];
+  longestStreakDays: number;
+}
 export type MuscleGroup =
   | "Chest"
   | "Back"
@@ -697,6 +710,28 @@ export type Database = {
           is_completed?: boolean;
           title?: string | null;
           notes?: string | null;
+        };
+        Relationships: [];
+      };
+      athlete_passports: {
+        Row: {
+          user_id: string;
+          slug: string;
+          is_public: boolean;
+          snapshot: PassportSnapshot;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          slug: string;
+          is_public?: boolean;
+          snapshot?: PassportSnapshot;
+          updated_at?: string;
+        };
+        Update: {
+          is_public?: boolean;
+          snapshot?: PassportSnapshot;
+          updated_at?: string;
         };
         Relationships: [];
       };
