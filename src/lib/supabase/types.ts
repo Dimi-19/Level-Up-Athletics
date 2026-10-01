@@ -556,6 +556,32 @@ export type Database = {
         Update: Record<string, never>;
         Relationships: [];
       };
+      runs: {
+        Row: {
+          id: string;
+          user_id: string;
+          run_date: string;
+          distance_km: number;
+          duration_seconds: number;
+          rpe: number | null;
+          shoe: string | null;
+          notes: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          run_date?: string;
+          distance_km: number;
+          duration_seconds: number;
+          rpe?: number | null;
+          shoe?: string | null;
+          notes?: string | null;
+          created_at?: string;
+        };
+        Update: Record<string, never>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
