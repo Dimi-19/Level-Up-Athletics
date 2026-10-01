@@ -11,6 +11,7 @@ export type PrimaryGoal = "cut" | "maintain" | "bulk";
 export type ExperienceLevel = "beginner" | "intermediate" | "advanced";
 export type MotivationContentType = "quote" | "video" | "podcast";
 export type MealType = "breakfast" | "lunch" | "dinner" | "snack";
+export type SkillCategory = "reps" | "timed" | "rating" | "binary" | "notes";
 export type MuscleGroup =
   | "Chest"
   | "Back"
@@ -576,6 +577,50 @@ export type Database = {
           duration_seconds: number;
           rpe?: number | null;
           shoe?: string | null;
+          notes?: string | null;
+          created_at?: string;
+        };
+        Update: Record<string, never>;
+        Relationships: [];
+      };
+      skills: {
+        Row: {
+          id: string;
+          sport: string;
+          name: string;
+          category: SkillCategory;
+          unit_label: string;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          sport: string;
+          name: string;
+          category: SkillCategory;
+          unit_label?: string;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: Record<string, never>;
+        Relationships: [];
+      };
+      skill_logs: {
+        Row: {
+          id: string;
+          user_id: string;
+          skill_id: string;
+          logged_date: string;
+          value: number | null;
+          notes: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          skill_id: string;
+          logged_date?: string;
+          value?: number | null;
           notes?: string | null;
           created_at?: string;
         };
